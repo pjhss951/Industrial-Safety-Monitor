@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Industrial Safety Monitor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f2f5f9;
+            color: #1f2937;
+        }
+
+        /* LOGIN */
+
+        #loginPage {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        }
+
+        .login-box {
+            width: 360px;
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 13px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .login-box button:hover {
+            background: #1d4ed8;
+        }
+
+        #loginError {
+            color: #dc2626;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* DASHBOARD */
+
+        #dashboardPage {
+            display: none;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 23px;
+        }
+
+        #logoutBtn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .container {
+            padding: 30px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            font-size: 26px;
+        }
+
+        #connectionStatus {
+            padding: 8px 14px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 14px;
+        }
+
+        /* WORKER CARDS */
+
+        #workersContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .worker-card {
+            background: white;
+            border-radius: 15px;
+            padding: 22px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .worker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .worker-header h3 {
+            font-size: 21px;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .normal {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .alert {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .offline {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .sensor {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .sensor-title {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .sensor-value {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .last-update {
+            margin-top: 18px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .no-workers {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 18px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .top-section h2 {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+
+<div id="loginPage">
+
+    <div class="login-box">
+
+        <h1>Safety Monitor</h1>
+
+        <p>Supervisor Login</p>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Supervisor Email"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
+
+        <button id="loginBtn">
+            Login
+        </button>
+
+        <div id="loginError"></div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<div id="dashboardPage">
+
+    <header>
+
+        <h1>Industrial Safety Monitor</h1>
+
+        <button id="logoutBtn">
+            Logout
+        </button>
+
+    </header>
+
+
+    <div class="container">
+
+        <div class="top-section">
+
+            <h2>Worker Monitoring</h2>
+
+            <div id="connectionStatus">
+                ● Firebase Connected
+            </div>
+
+        </div>
+
+
+        <div id="workersContainer">
+
+            <div class="no-workers">
+                Waiting for worker data...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= FIREBASE ================= -->
+
+<script type="module">
+
+    import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+    import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut
+    }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+    import {
+        getDatabase,
+        ref,
+        onValue
+    }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+    // ==========================================
+    // FIREBASE CONFIGURATION
+    // ==========================================
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyDxzd523thIfEkpcOT36H7rVIiZU_BzT6g",
+
+        authDomain:
+            "industrial-safety-monito-33208.firebaseapp.com",
+
+        databaseURL:
+            "https://industrial-safety-monito-33208-default-rtdb.firebaseio.com",
+
+        projectId:
+            "industrial-safety-monito-33208",
+
+        storageBucket:
+            "industrial-safety-monito-33208.firebasestorage.app",
+
+        messagingSenderId:
+            "738401871234",
+
+        appId:
+            "1:738401871234:web:ec0f74ca02e5723977db9b",
+
+        measurementId:
+            "G-1Q2HY9VJ51"
+    };
+
+
+    // ==========================================
+    // INITIALIZE FIREBASE
+    // ==========================================
+
+    const app = initializeApp(firebaseConfig);
+
+    const auth = getAuth(app);
+
+    const db = getDatabase(app);
+
+
+    // ==========================================
+    // HTML ELEMENTS
+    // ==========================================
+
+    const loginPage =
+        document.getElementById("loginPage");
+
+    const dashboardPage =
+        document.getElementById("dashboardPage");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    const loginError =
+        document.getElementById("loginError");
+
+    const workersContainer =
+        document.getElementById("workersContainer");
+
+
+    // ==========================================
+    // LOGIN
+    // ==========================================
+
+    loginBtn.addEventListener("click", async () => {
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+
+        loginError.textContent = "";
+
+
+        if (!email || !password) {
+
+            loginError.textContent =
+                "Please enter email and password.";
+
+            return;
+        }
+
+
+        try {
+
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            loginError.textContent =
+                "Login failed: " + error.message;
+        }
+
+    });
+
+
+    // ==========================================
+    // LOGOUT
+    // ==========================================
+
+    logoutBtn.addEventListener("click", async () => {
+
+        await signOut(auth);
+
+    });
+
+
+    // ==========================================
+    // AUTH STATE
+    // ==========================================
+
+    onAuthStateChanged(auth, (user) => {
+
+        if (user) {
+
+            console.log(
+                "Supervisor logged in:",
+                user.email
+            );
+
+            loginPage.style.display = "none";
+
+            dashboardPage.style.display = "block";
+
+            startWorkerMonitoring();
+
+        }
+
+        else {
+
+            loginPage.style.display = "flex";
+
+            dashboardPage.style.display = "none";
+
+        }
+
+    });
+
+
+    // ==========================================
+    // WORKER MONITORING
+    // ==========================================
+
+    function startWorkerMonitoring() {
+
+        const workersRef =
+            ref(db, "Workers");
+
+
+        onValue(
+
+            workersRef,
+
+            (snapshot) => {
+
+                const workers =
+                    snapshot.val();
+
+
+                workersContainer.innerHTML = "";
+
+
+                if (!workers) {
+
+                    workersContainer.innerHTML = `
+                        <div class="no-workers">
+                            No workers found in Firebase.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+
+                Object.entries(workers).forEach(
+                    ([workerId, data]) => {
+
+                        createWorkerCard(
+                            workerId,
+                            data
+                        );
+
+                    }
+                );
+
+            },
+
+            (error) => {
+
+                console.error(
+                    "Firebase error:",
+                    error
+                );
+
+                workersContainer.innerHTML = `
+                    <div class="no-workers">
+                        Unable to read worker data.
+                        Check Firebase Security Rules.
+                    </div>
+                `;
+
+            }
+
+        );
+
+    }
+
+
+    // ==========================================
+    // CREATE WORKER CARD
+    // ==========================================
+
+    function createWorkerCard(
+        workerId,
+        data
+    ) {
+
+        const status =
+            data.status || "Unknown";
+
+
+        let statusClass =
+            "offline";
+
+
+        const statusLower =
+            status.toLowerCase();
+
+
+        if (statusLower === "normal") {
+
+            statusClass = "normal";
+
+        }
+
+        else if (
+            statusLower === "warning"
+        ) {
+
+            statusClass = "warning";
+
+        }
+
+        else if (
+            statusLower === "alert"
+        ) {
+
+            statusClass = "alert";
+
+        }
+
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "worker-card";
+
+
+        card.innerHTML = `
+
+            <div class="worker-header">
+
+                <h3>
+                    Worker ${workerId}
+                </h3>
+
+                <span class="status ${statusClass}">
+                    ${status}
+                </span>
+
+            </div>
+
+
+            <div class="sensor-grid">
+
+
+                <div class="sensor">
+
+                    <div class="sensor-title">
+                        ❤️ Heart Rate
+                    </div>
+
+                    <div class="sensor-value">
+                        ${data.heartRate ?? "--"}
+                        <small>BPM</small>
+                    </div>
+
+                </div>
+
+
+                <div class="sensor">
+
+                    <div class="sensor-title">
+                        🫁 SpO₂
+                    </div>
+
+                    <div class="sensor-value">
+                        ${data.spo2 ?? "--"}
+                        <small>%</small>
+                    </div>
+
+                </div>
+
+
+                <div class="sensor">
+
+                    <div class="sensor-title">
+                        🌡 Temperature
+                    </div>
+
+                    <div class="sensor-value">
+                        ${data.temperature ?? "--"}
+                        <small>°C</small>
+                    </div>
+
+                </div>
+
+
+                <div class="sensor">
+
+                    <div class="sensor-title">
+                        💧 Humidity
+                    </div>
+
+                    <div class="sensor-value">
+                        ${data.humidity ?? "--"}
+                        <small>%</small>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="last-update">
+
+                Last update:
+                ${new Date().toLocaleTimeString()}
+
+            </div>
+
+        `;
+
+
+        workersContainer.appendChild(card);
+
+    }
+
+</script>
+
+</body>
+</html>
